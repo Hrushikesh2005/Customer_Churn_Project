@@ -1,0 +1,163 @@
+<style>
+  body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+  }
+
+  .container {
+      width: 100%;
+      max-width: 500px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+  }
+
+  p {
+      font-size: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #666;
+  }
+
+  hr {
+      border: 1px solid #f1f1f1;
+      margin-bottom: 20px;
+  }
+
+  label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+      color: #333;
+  }
+
+  input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+  }
+
+  input[type="checkbox"] {
+      margin-right: 10px;
+  }
+
+  .clearfix {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+
+  .signupbtn, .cancelbtn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 48%;
+      text-align: center;
+      font-size: 16px;
+  }
+
+  .signupbtn:hover, .cancelbtn:hover {
+      background-color: #45a049;
+  }
+
+  .cancelbtn {
+      background-color: #f44336;
+  }
+
+  .cancelbtn:hover {
+      background-color: #e53935;
+  }
+
+  .t_c {
+      font-size: 14px;
+      text-align: center;
+      margin: 20px 0;
+  }
+
+  .t_c a {
+      color: dodgerblue;
+      text-decoration: none;
+  }
+
+  .t_c a:hover {
+      text-decoration: underline;
+  }
+
+  a[href="{%url 'login'%}"] {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: dodgerblue;
+      text-decoration: none;
+  }
+
+  a[href="{%url 'login'%}"]:hover {
+      text-decoration: underline;
+  }
+
+  .error_message {
+      color: red;
+      text-align: center;
+      margin-top: 20px;
+  }
+</style>
+
+
+
+<form method="post">
+  {% csrf_token %}
+  <div class="container">
+      <h1>Sign Up</h1>
+      <p>Please fill in this form to create an account.</p>
+      <hr>
+
+      <label for="uname"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="uname" required>
+
+      <label for="email"><b>Email</b></label>
+      <input type="text" placeholder="Enter Email" name="email" required>
+
+      <label for="psw"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="password" required>
+
+      <label for="psw-confirm"><b>Confirm Password</b></label>
+      <input type="password" placeholder="Repeat Password" name="cpassword" required>
+
+      <label>
+          <input type="checkbox" checked="checked" name="remember"> Remember me
+      </label>
+
+      <p class="t_c">By creating an account you agree to our <a href="terms_conditions#">Terms and Privacy</a>.</p>
+
+      <div class="clearfix">
+          <button type="button" class="cancelbtn">Cancel</button>
+          <button type="submit" class="signupbtn">Sign Up</button>
+      </div>
+
+      <a href="{%url 'login'%}">I already have an account</a>
+      
+      {% if error_message %}
+          <p class="error_message">{{ error_message }}</p>
+      {% endif %}
+  </div>
+</form>
