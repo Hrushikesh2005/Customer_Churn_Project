@@ -143,8 +143,8 @@ button:hover {
 
     <div class="container secondary">
         {% comment %} <button type="button" class="cancelbtn">Cancel</button><br> {% endcomment %}
-        <span class="psw"><a href="#">Forgot password?</a></span>
-        <a href="{%url 'signup'%}">Create Account</a>
+        {% comment %} <span class="psw"><a href="#">Forgot password?</a></span> {% endcomment %}
+        <a href="{%url 'churn:signup'%}">Create Account</a>
     </div>
 </form>
 

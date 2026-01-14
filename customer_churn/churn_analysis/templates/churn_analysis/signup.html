@@ -103,7 +103,7 @@
       text-decoration: underline;
   }
 
-  a[href="{%url 'login'%}"] {
+  a[href="{%url 'churn:login'%}"] {
       display: block;
       text-align: center;
       margin-top: 20px;
@@ -111,7 +111,7 @@
       text-decoration: none;
   }
 
-  a[href="{%url 'login'%}"]:hover {
+  a[href="{%url 'churn:login'%}"]:hover {
       text-decoration: underline;
   }
 
@@ -154,7 +154,7 @@
           <button type="submit" class="signupbtn">Sign Up</button>
       </div>
 
-      <a href="{%url 'login'%}">I already have an account</a>
+      <a href="{%url 'churn:login'%}">I already have an account</a>
       
       {% if error_message %}
           <p class="error_message">{{ error_message }}</p>

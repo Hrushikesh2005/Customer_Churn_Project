@@ -28,36 +28,50 @@ from sklearn.metrics import accuracy_score
 def HomePage(request):
     return render(request, 'home.html')
 
-#-----------------Signup view-----------------
+#-----------------(1) Signup view-----------------
 
 def SignUp(request):
-    if request.method == 'POST':
+    if request.method == 'POST':           # ← Button pressed (form submitted)
+        # Process form data
         uname = request.POST.get('uname')
         email = request.POST.get('email')
         password = request.POST.get('password')
         cpassword = request.POST.get('cpassword')
-        remember = request.POST.get('remember')
+        
         if password != cpassword:
+            # Decision 1: Stay on signup page with error
             return HttpResponse("Password and Confirm Password doesn't match")
         else:
+            # Decision 2: Create user and redirect to login
             my_user = User.objects.create_user(uname, email, password)
             my_user.save()
-            return redirect('login')
+            return redirect('login')  # ← Django loads login page
+    
+    # If GET request (just viewing the page)
     return render(request, 'churn_analysis/signup.html')
 
-#-----------------Login view-----------------
-
+#-----------------(2) Login view-----------------
 def LoginPage(request):
+    
     if request.method == 'POST':
+    
         username = request.POST.get('username')
         password1 = request.POST.get('pass')
         user = authenticate(request, username=username, password=password1)
+    
         if user is not None:
             login(request, user)
             return redirect('home')
         else:
             return HttpResponse("Username or Password incorrect!")
+    
     return render(request, 'churn_analysis/login.html')
+
+#-----------------(3)HOME VIEW-----------------
+
+def home(request):
+    return render(request, 'churn_analysis/home.html')
+
 
 #----------------- Logout view-----------------
 
@@ -206,12 +220,6 @@ def download_csv(request):
     response['Content-Disposition'] = 'attachment; filename=modified_data.csv'
     
     return response
-
-
-#-----------------HOME VIEW-----------------
-
-def home(request):
-    return render(request, 'churn_analysis/home.html')
 
 #---------------------------------------------------
 

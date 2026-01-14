@@ -16,15 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from churn_analysis import views
 
-urlpatterns = [
-    path('home/', views.home, name='home'),
+urlpatterns = [    
     path('admin/', admin.site.urls),
-    path('churn/', include('churn_analysis.urls')),
-    path('',views.SignUp,name='signup'),
-    path('login/',views.LoginPage,name='login'),
-    # path('home/',views.HomePage,name='home'),
-    path('logout/',views.LogoutPage,name='logout'),
-    path('download_csv/', views.download_csv, name='download_csv'),
+    path('churn/', include('churn_analysis.urls', namespace='churn')), # Include URLs from churn_analysis app
+    path('', lambda request: redirect('churn:signup')),  # Redirect root URL to signup page
 ]
