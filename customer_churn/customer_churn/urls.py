@@ -21,6 +21,6 @@ from churn_analysis import views
 
 urlpatterns = [    
     path('admin/', admin.site.urls),
-    path('churn/', include('churn_analysis.urls', namespace='churn')), # Include URLs from churn_analysis app
+    path('', include('churn_analysis.urls', namespace='churn')), # Include URLs from churn_analysis app
     path('', lambda request: redirect('churn:signup')),  # Redirect root URL to signup page
 ]
