@@ -23,11 +23,6 @@ from sklearn.metrics import accuracy_score
 
 #********************************************************************
 
-# Home page view with login_required decorator
-@login_required(login_url='login')
-def HomePage(request):
-    return render(request, 'home.html')
-
 #-----------------(1) Signup view-----------------
 
 def SignUp(request):
@@ -45,30 +40,31 @@ def SignUp(request):
             # Decision 2: Create user and redirect to login
             my_user = User.objects.create_user(uname, email, password)
             my_user.save()
-            return redirect('login')  # ← Django loads login page
+            return redirect('churn:login')  # ← Use URL name, not template path
     
     # If GET request (just viewing the page)
     return render(request, 'churn_analysis/signup.html')
 
 #-----------------(2) Login view-----------------
 def LoginPage(request):
-    
     if request.method == 'POST':
-    
         username = request.POST.get('username')
         password1 = request.POST.get('pass')
         user = authenticate(request, username=username, password=password1)
     
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('churn:home')
         else:
-            return HttpResponse("Username or Password incorrect!")
+            return render(request, 'churn_analysis/login.html', {
+                'error_message': "Username or Password incorrect!"
+            })
     
     return render(request, 'churn_analysis/login.html')
 
 #-----------------(3)HOME VIEW-----------------
 
+@login_required(login_url='churn:login')
 def home(request):
     return render(request, 'churn_analysis/home.html')
 
@@ -77,7 +73,7 @@ def home(request):
 
 def LogoutPage(request):
     logout(request)
-    return redirect('login')
+    return redirect('churn:login')  # Use URL name instead of 'login'
 
 
 
