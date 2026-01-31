@@ -21,7 +21,7 @@ matplotlib>=3.7.0
 # whitenoise>=6.5.0           # For static file serving in production
 
 # Development Tools (Optional)
-# python-decouple>=3.8        # For environment variable management
+python-decouple>=3.8        # For environment variable management
 # python-dotenv>=1.0.0        # Alternative for .env file support
 
 # Database (SQLite is included with Python, but for other databases):
