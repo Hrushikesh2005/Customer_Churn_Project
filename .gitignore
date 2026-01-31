@@ -52,3 +52,6 @@ Thumbs.db
 *.mov
 *.pdf
 *.docx
+
+# CSV data files
+*.csv
