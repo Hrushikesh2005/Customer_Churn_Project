@@ -6,44 +6,94 @@
     <title>Churn Analysis Results</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
-    <div class="max-w-2xl bg-white rounded-lg shadow-lg p-8 mx-auto text-center">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Churn Analysis Results</h1>
-        <p class="text-lg text-gray-700 mb-6">Churn Rate: <span class="text-blue-500 font-semibold">{{ churn_rate }}%</span></p>
+<body class="bg-gray-100 font-sans">
 
-        <div class="mb-8">
-            <img class="mx-auto rounded-md shadow-md" src="data:image/png;base64,{{ chart }}" alt="Churn Analysis Pie Chart">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Churn Analysis</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm">Welcome, <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'churn:logout' %}" class="px-4 py-2 bg-red-500 rounded hover:bg-red-600 transition">Logout</a>
+            </div>
         </div>
+    </nav>
 
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Feature Importance</h2>
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white border rounded-lg shadow-lg mb-8">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-700">
-                        <th class="px-4 py-2 border-b">Feature</th>
-                        <th class="px-4 py-2 border-b">Importance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for feature, importance in feature_importances.items %}
-                    <tr>
-                        <td class="px-4 py-2 border-b">{{ feature }}</td>
-                        <td class="px-4 py-2 border-b">{{ importance|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-6">
+                <h2 class="text-lg font-bold text-gray-800 mb-6">Navigation</h2>
+                <nav class="space-y-2">
+                    <a href="{% url 'churn:home' %}" class="block px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Dashboard</a>
+                    <a href="{% url 'churn:upload_file' %}" class="block px-4 py-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Upload File</a>
+                </nav>
+            </div>
+        </aside>
 
-        {% if accuracy %}
-        <h3 class="text-lg font-semibold text-gray-700">Model Accuracy: {{ accuracy|floatformat:2 }}%</h3>
-        {% endif %}
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="max-w-5xl mx-auto">
+                <h1 class="text-3xl font-bold text-gray-800 mb-6">Churn Analysis Results</h1>
 
-        <form action="{% url 'churn:download_csv' %}" method="GET" class="mt-6">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow-md">
-                Download Modified CSV
-            </button>
-        </form>
+                <!-- Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Churn Rate</h3>
+                        <p class="text-4xl font-bold text-blue-500">{{ churn_rate }}%</p>
+                    </div>
+                    {% if accuracy %}
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">Model Accuracy</h3>
+                        <p class="text-4xl font-bold text-green-500">{{ accuracy|floatformat:2 }}%</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Churn Distribution</h2>
+                    <img class="mx-auto rounded-md" src="data:image/png;base64,{{ chart }}" alt="Churn Analysis Pie Chart">
+                </div>
+
+                <!-- Feature Importance Table -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Feature Importance</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Feature</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Importance</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for feature, importance in feature_importances.items %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 text-sm text-gray-800">{{ feature }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-800">{{ importance|floatformat:4 }}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: {{ importance|floatformat:2 }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Download Button -->
+                <div class="text-center">
+                    <form action="{% url 'churn:download_csv' %}" method="GET">
+                        <button type="submit" class="px-8 py-3 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600 transition shadow-lg">Download Modified CSV</button>
+                    </form>
+                </div>
+            </div>
+        </main>
     </div>
+
 </body>
 </html>

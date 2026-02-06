@@ -24,5 +24,5 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('uploads/', views.upload_file, name='upload_file'),
     path('download_csv/', views.download_csv, name='download_csv'),
-    path('logout/', views.LogoutPage, name='LogoutPage'),
+    path('logout/', views.LogoutPage, name='logout'),
 ]

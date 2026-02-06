@@ -1,10 +1,11 @@
 import base64
 from io import BytesIO
-from django.shortcuts import render
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend for Django
 from matplotlib import pyplot as plt
 
-
-def result(request, churn_rate, churn_counts, feature_importances, accuracy):
+def results(churn_rate, churn_counts, feature_importances, accuracy):
+    """Generate visualization and render results page"""
     # Plot churn distribution
     plt.figure(figsize=(8, 6))
     plt.pie(churn_counts.values, labels=['Not Churned', 'Churned'], autopct='%1.1f%%', startangle=90)
@@ -16,6 +17,7 @@ def result(request, churn_rate, churn_counts, feature_importances, accuracy):
     buffer.seek(0)
     image_png = buffer.getvalue()
     buffer.close()
+    plt.close()
 
     chart_base64 = base64.b64encode(image_png).decode('utf-8')
 
@@ -25,5 +27,5 @@ def result(request, churn_rate, churn_counts, feature_importances, accuracy):
         'feature_importances': feature_importances.to_dict(),
         'accuracy': accuracy
     }
-
-    return render(request, 'churn_analysis/results.html', context)
+    
+    return context

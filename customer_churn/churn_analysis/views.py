@@ -1,10 +1,17 @@
 from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required  # Import this
+from django.contrib.auth.decorators import login_required
 
 from churn_analysis.services.handle_uploads import handle_uploaded_file
-from churn_analysis.services.insights import result
+from churn_analysis.services.insights import results
+from churn_analysis.models import ChurnAnalysis
+
+import base64
+from io import BytesIO
+from matplotlib import pyplot as plt
+from django.core.files.base import ContentFile
+
 
 from .forms import UploadFileForm
 
@@ -31,6 +38,7 @@ def SignUp(request):
     return render(request, 'churn_analysis/signup.html')
 
 #-----------------(2) Login view-----------------
+
 def LoginPage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -51,7 +59,10 @@ def LoginPage(request):
 
 @login_required(login_url='churn:login')
 def home(request):
-    return render(request, 'churn_analysis/home.html')
+    # Fetch all analyses for the logged-in user
+    analyses = ChurnAnalysis.objects.filter(user=request.user)
+    context = {'analyses': analyses}
+    return render(request, 'churn_analysis/home.html', context)
 
 
 #----------------- Logout view-----------------
@@ -61,22 +72,50 @@ def LogoutPage(request):
     return redirect('churn:login')  # Use URL name instead of 'login'
 
 #-----------------UPLOAD FILE VIEW-----------------
+
 @login_required(login_url='churn:login')
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
+        
         if form.is_valid():
             file = request.FILES['file']
-            has_churn_column = form.cleaned_data['has_churn_column']  # Get user's input about the churn column
+            has_churn_column = form.cleaned_data['has_churn_column']
 
             try:
-                churn_rate, churn_counts, modified_df, feature_importances, accuracy = handle_uploaded_file(file, has_churn_column)
-
-                # Save the modified DataFrame to a session for download
-                request.session['modified_csv'] = modified_df.to_csv(index=False)
-            
-                # Call result view and pass feature importances and accuracy
-                return result(request, churn_rate, churn_counts, feature_importances, accuracy)
+                # Reset file pointer
+                file.seek(0)
+                
+                total_results, modified_df = handle_uploaded_file(file, has_churn_column)
+                
+                # Save modified CSV to model
+                csv_content = modified_df.to_csv(index=False)
+                analysis = ChurnAnalysis.objects.create(
+                    user=request.user,
+                    filename=file.name,
+                    churn_rate=total_results['churn_rate'],
+                    accuracy=total_results['accuracy'],
+                    has_churn_column=(has_churn_column == 'yes')
+                )
+                
+                # Save the modified CSV file
+                analysis.output_file.save(
+                    f"analysis_{analysis.id}_{file.name}",
+                    ContentFile(csv_content)
+                )
+                
+                # Save input file too
+                file.seek(0)
+                analysis.input_file.save(f"input_{analysis.id}_{file.name}", file)
+                
+                # Call result view
+                context = results(total_results['churn_rate'], total_results['churn_counts'], 
+                                total_results['feature_importances'], total_results['accuracy'])
+                
+                # Store analysis ID in session for download
+                request.session['current_analysis_id'] = analysis.id
+                
+                return render(request, "churn_analysis/results.html", context)
             
             except ValueError as e:
                 form.add_error(None, str(e))
@@ -89,20 +128,30 @@ def upload_file(request):
 
 #-----------------DOWNLOAD_NEW_CSV VIEW-----------------
 
-from django.http import HttpResponse
-
 def download_csv(request):
-    # Retrieve the CSV data from session storage
-    modified_csv = request.session.get('modified_csv', '')
-
-    if not modified_csv:
-        return HttpResponse("No CSV file available for download.", status=404)
-
-    # Set up the HTTP response with the CSV file
-    response = HttpResponse(modified_csv, content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=modified_data.csv'
+    # Get analysis ID from POST or session
+    analysis_id = request.POST.get('analysis_id') or request.session.get('current_analysis_id')
     
-    return response
+    if not analysis_id:
+        return HttpResponse("No CSV file available for download.", status=404)
+    
+    try:
+        analysis = ChurnAnalysis.objects.get(id=analysis_id, user=request.user)
+        
+        if not analysis.output_file:
+            return HttpResponse("No CSV file found.", status=404)
+        
+        # Read the file from storage
+        file_content = analysis.output_file.read()
+        
+        # Set up the HTTP response
+        response = HttpResponse(file_content, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename=analysis_{analysis_id}_output.csv'
+        
+        return response
+    
+    except ChurnAnalysis.DoesNotExist:
+        return HttpResponse("Analysis not found.", status=404)
 
 
 

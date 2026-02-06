@@ -21,7 +21,7 @@ def handle_uploaded_file(file, has_churn_column):
         
         feature_importances = results['feature_importance']
         accuracy = results['accuracy']  
-        model = results['model']
+        # model = results['model']
 
     # Unsupervised learning (KMeans) if no churn column
     else:
@@ -33,4 +33,10 @@ def handle_uploaded_file(file, has_churn_column):
     churn_rate = round((df['Churn'].mean() * 100), 1)
     churn_counts = df['Churn'].value_counts()
 
-    return churn_rate, churn_counts, df, feature_importances, accuracy
+    total_results = {
+        'churn_rate': churn_rate,
+        'churn_counts': churn_counts,
+        'feature_importances': feature_importances,
+        'accuracy': accuracy
+    }
+    return total_results, df_preprocessed

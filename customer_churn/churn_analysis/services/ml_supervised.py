@@ -26,7 +26,7 @@ def run_supervised_churn(df):
     ).sort_values(ascending=False)
 
     return {
-        "model": model,
+        # "model": model,
         "accuracy": accuracy,
         "feature_importance": feature_importance
     }
